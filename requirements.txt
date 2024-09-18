@@ -1,0 +1,7 @@
+gradio
+torch
+git+https://github.com/huggingface/transformers
+qwen-vl-utils
+datasets
+Pillow
+tqdm
