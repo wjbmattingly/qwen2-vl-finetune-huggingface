@@ -103,3 +103,15 @@ To finetune on your own HuggingFace dataset:
 
 1. Modify the `dataset_name`, `image_column`, and `text_column` parameters in `train_and_validate`.
 2. Adjust other parameters such as `max_steps`, `eval_steps`, and batch sizes as needed.
+
+## Roadmap
+
+
+Future improvements and features:
+
+- [ ] Implement distributed GPU fine-tuning for faster training on multiple GPUs
+- [ ] Add support for training on video datasets to leverage Qwen2-VL's video processing capabilities
+- [ ] Develop more complex and custom message structures to handle diverse tasks
+- [ ] Expand functionality to support tasks beyond Handwritten Text Recognition (HTR)
+
+
