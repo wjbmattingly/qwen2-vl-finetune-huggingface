@@ -1,14 +1,11 @@
 import gradio as gr
 import torch
-from .src.finetune import train_and_validate
+from src.finetune import train_and_validate
 import json
 from datasets import load_dataset
 
-def finetune_model(model_name, output_dir, dataset_name, image_column, text_column, user_text, num_accumulation_steps, eval_steps, max_steps, train_batch_size, val_batch_size, train_select_start, train_select_end, val_select_start, val_select_end, train_field, val_field, device, min_pixel, max_pixel, image_factor):
-    # Set the device
-    device = "cuda" if torch.cuda.is_available() else "cpu"
-    
-    
+def finetune_model(model_name, output_dir, dataset_name, image_column, text_column, user_text, num_accumulation_steps, eval_steps, max_steps, train_batch_size, val_batch_size, train_select_start, train_select_end, val_select_start, val_select_end, train_field, val_field, min_pixel, max_pixel, image_factor, device):
+
     # Call the train_and_validate function with the provided parameters
     train_and_validate(
         model_name=model_name,
@@ -93,40 +90,50 @@ with gr.Blocks() as iface:
         value="Qwen/Qwen2-VL-2B-Instruct"
     )
     
+    
     user_text = gr.Textbox(label="User Instructions", value="Convert this image to text")
     preview_button = gr.Button("Preview Message Structure")
     message_preview = gr.JSON(label="Message Structure Preview")
     
     preview_button.click(preview_message_structure, inputs=[dataset_name, image_column, text_column, user_text], outputs=[message_preview])
     
-    output_dir = gr.Textbox(label="Output Directory")
+    gr.Markdown("## Model Configuration")
+    with gr.Column():
+        device = gr.Dropdown(label="Device", choices=["cuda", "cpu", "mps"], value="cuda")
+        output_dir = gr.Textbox(label="Output Directory")
+    
+    gr.Markdown("## Training Parameters")
     with gr.Row():
         with gr.Column():
+            gr.Markdown("### Training Steps and Evaluation")
             num_accumulation_steps = gr.Number(label="Number of Accumulation Steps", value=2)
             eval_steps = gr.Number(label="Evaluation Steps", value=10000)
             max_steps = gr.Number(label="Max Steps", value=100000)
         with gr.Column():
+            gr.Markdown("### Batch Sizes")
             train_batch_size = gr.Number(label="Training Batch Size", value=1)
             val_batch_size = gr.Number(label="Validation Batch Size", value=1)
         with gr.Column():
+            gr.Markdown("### Training Data Selection")
             train_select_start = gr.Number(label="Training Select Start", value=0)
             train_select_end = gr.Number(label="Training Select End", value=100000)
         with gr.Column():
+            gr.Markdown("### Validation Data Selection")
             val_select_start = gr.Number(label="Validation Select Start", value=0)
             val_select_end = gr.Number(label="Validation Select End", value=10000)
+    
+    gr.Markdown("## Image Processing Settings")
     with gr.Row():
         with gr.Column():
-            device = gr.Dropdown(label="Device", choices=["cuda", "cpu", "mps"], value="cuda")
-            min_pixel = gr.Number(label="Minimum Pixel Size", value=256)
-        with gr.Column():
-            max_pixel = gr.Number(label="Maximum Pixel Size", value=384)
-            image_factor = gr.Number(label="Image Factor", value=28)
+            min_pixel = gr.Number(label="Minimum Pixel Size", value=256, precision=0)
+            max_pixel = gr.Number(label="Maximum Pixel Size", value=384, precision=0)
+            image_factor = gr.Number(label="Image Factor", value=28, precision=0)
     finetune_button = gr.Button("Start Finetuning")
     result = gr.Textbox(label="Result")
     
     finetune_button.click(
         finetune_model,
-            inputs=[model_name,output_dir, dataset_name, image_column, text_column, user_text, num_accumulation_steps, eval_steps, max_steps, train_batch_size, val_batch_size, train_select_start, train_select_end, val_select_start, val_select_end, train_field, val_field],
+            inputs=[model_name,output_dir, dataset_name, image_column, text_column, user_text, num_accumulation_steps, eval_steps, max_steps, train_batch_size, val_batch_size, train_select_start, train_select_end, val_select_start, val_select_end, train_field, val_field, min_pixel, max_pixel, image_factor, device],
             outputs=[result]
     )
 
